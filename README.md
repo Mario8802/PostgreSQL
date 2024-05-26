@@ -16,6 +16,14 @@
 
 ---
 
+[Data Aggregation](https://forms.gle/zDr5w2v5uDfTxT6v5)
+
+---
+
+[Table Relations](https://forms.gle/qYAZDquBNGSQmTYx9)
+
+---
+
 ## Plans
 
 ### Databases Introduction. Data Definition and Datatypes.
