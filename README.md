@@ -16,6 +16,22 @@
 
 ---
 
+[Data Aggregation](https://forms.gle/zDr5w2v5uDfTxT6v5)
+
+---
+
+[Table Relations](https://forms.gle/qYAZDquBNGSQmTYx9)
+
+---
+
+[Subqueries and Joins](https://forms.gle/iquiVSbKE2xd7QRTA)
+
+---
+
+[Data Programmability](https://forms.gle/bWeXZg21VBwMLyQ17)
+
+---
+
 ## Plans
 
 ### Databases Introduction. Data Definition and Datatypes.
@@ -218,3 +234,221 @@ BUILD IN FUNCTIONS
    - REGEXP
 
 ---
+
+### Data Aggregation
+
+<b>Агрегация - процес на обединение на различни елементи в една система.</b>
+
+1. Grouping 
+- Третираме еднакви записи като един 
+- При GROUP BY, за разлика от distinct можем да ползваме агрегиращи функции
+- COUNT(DISTINCT()) - ще даде броя на групите
+- COUNT(*) - брой редовете
+
+2. Aggregate functions
+- AVG, MIN, MAX, COUNT, SUM
+
+3. Having 
+
+- Допълнителна филтрация, в която можем да използваме агрегиращи функции
+- Извършва се след като данните са взети
+
+4. CASE
+
+- Simple Case
+  - Използваме, когато сравняваме само една стойност
+
+```sql
+SELECT 
+    column_name,
+    CASE grade
+        WHEN 'A' THEN 'Excellent'
+        WHEN 'B' THEN 'Good'
+        WHEN 'C' THEN 'Fair'
+        ELSE 'Poor'
+    END AS grade_description
+FROM student_grades;
+```
+
+- General Case
+  - Използваме, когато  сравняваме различни условия
+
+
+```sql
+SELECT 
+    column_name,
+    CASE 
+        WHEN grade >= 90 THEN 'Excellent'
+        WHEN grade >= 80 THEN 'Good'
+        WHEN grade >= 70 THEN 'Fair'
+	WHEN grade <= 0 THEN 'Mistake'
+        ELSE 'Poor'
+    END AS grade_description
+FROM student_grades;
+```
+
+Edge cases to keep in mind:
+
+* COUNT() - брои всичко без Null
+* WHERE се изпълнява преди да се върнат данните, нещо като if, върху този резултат правим групиране и върху него чак тогава HAVING
+* WHERE филтрира преди да се вземат данните, докато HAVING е след като са взети
+
+---
+
+### Table Relations
+
+
+1. Entites - Стъпки в DB Design
+   
+   1.1 Дефиниране на обекти
+   	- Всяка таблица представлява обект
+
+   1.2 Създаване на колони
+   
+   1.3 Дефиниране на PK
+   	- ID-тата са INT или STRING 
+	- По-сигурно е да са стрингове, защото по-трудно се разбиват с brute force
+   	- Ако нещо е PK, то то вече е Unique
+   	  
+   1.4 Дефиниране на релации
+        - Many To One
+        - Many To Many - постигаме чрез junction/mapping table
+        - One To One
+   
+   1.5 Дефиниране на ограничения - CONSTRAINTS
+   
+   1.6 Попълване с тестови данни
+
+3. Cascade delete
+   - Изтривайки един запис, свързан с други записи посредством релация, изтриваме всички записи.
+
+   - Използваме, когато искаме да запазим консистентност на данните
+   - Не го използваме, когато искаме да запазим някаква история или логове.
+  
+4. Други опции за изтриване:
+   - NO ACTION, SET NULL, SET DEFAULT, RESTRICT
+   
+Good to keep in mind:
+
+*Композитен ключ е ключ създаден от условие пример concat(f_name, l_name)
+
+---
+
+### Subqueries and Joins
+
+1. Joins - better than selects with where in performance
+   - Inner Join - Default join - join where both are not null, if one is null both are not visualized
+   - Left Join - Join the left table if right is null
+   - Right Join - Join the right if left is null
+   - Full join (union) - join everything
+   - Outer join (union) - less used
+   - Cross Join - every element from one table with every element from the other - not used often
+
+2. Subqueries
+   - SELECT FROM SELECT
+   - Example:
+   ```sql
+   
+   SELECT first_name, last_name, department, salary
+   FROM employees
+   WHERE salary > (
+      SELECT AVG(salary)
+      FROM employees
+      WHERE department = 'Finance'
+   );
+
+3. Indicies
+   - Индексиране на таблица е създаване на структура върху нашата таблица, която гледа и анализира нашата таблица и прави един вид шорткът
+   - Като голяма книга, с разделители и примерно, ако търсиш зебра отиваш на буквата З
+   - Два вида индекси
+	- Clustered - сортиране на стойностите с цел бинарно търсене
+        - Non-clustered - B-Tree (Balanced Tree) - създава уникални node-ове и всеки node държи pointer към записите
+   - Създавайки индекси по-бързо четем, но по-бавно update-ваме и трием записи, също така губим памет.
+
+---
+
+
+### Database Programmability
+
+1. Functions
+- Създаваме си наши функции подобно на view-та
+- Създаваме функцията
+  - Ф-цията може да бъде на различни езици: Python, Pascal, plpgsql
+- Казваме какво връща като тип
+- Функциите в postgres биват 3 типа
+	- STABLE - това са фунцкиите, които при една и съща таблица връщат един и същ резултат, ф-ция за броя редове
+	- IMMUTABLE - функцията винаги ще връща един и същи резултат, независима от таблици, пример квадрат на число
+	- VOLATILE - това са функциите по-подразбиране, променливи
+- Дефинирайки функция, като STABLE или IMMUTABLE, може да подобрим нейното бързодействие
+- Можем да достъпваме променливи чрез $цифра, но не е преопоръчително
+
+2. Procedures
+- повечето случаи void фунцкции
+- execute by CALL 
+
+3. Transactionsx
+- Дейстивия, които извършваме върху базата и можем да върнем, ако пожелаем
+
+```sql
+-- Start a transaction
+BEGIN;
+
+-- Deduct $100 from Alice's account
+UPDATE accounts SET balance = balance - 100 WHERE account_id = 1;
+
+-- Add $100 to Bob's account
+UPDATE accounts SET balance = balance + 100 WHERE account_id = 2;
+
+-- Check Bob's new balance
+DECLARE
+    bob_balance DECIMAL(20,2);
+BEGIN
+    SELECT balance INTO bob_balance FROM accounts WHERE account_id = 2;
+    IF bob_balance > 1000 THEN
+        RAISE NOTICE 'Bob has too much money. Rolling back transaction.';
+        ROLLBACK;
+        RETURN;
+    END IF;
+END;
+```
+
+- Savepoint Example:
+
+```sql
+-- Start the transaction
+BEGIN;
+
+-- Add some amount
+UPDATE accounts SET balance = balance + 50 WHERE id = 1;
+
+-- Create a savepoint
+SAVEPOINT my_savepoint;
+
+-- Deduct some amount
+UPDATE accounts SET balance = balance - 30 WHERE id = 1;
+
+-- Decide for some reason to rollback to the savepoint
+ROLLBACK TO SAVEPOINT my_savepoint;
+
+END;
+```
+
+4. Trigger
+- Functions executed Before/After a DELETE/UPDATE/INSERT query
+- Example:
+
+```sql
+CREATE OR REPLACE FUNCTION update_last_modified()
+RETURNS TRIGGER AS $$
+BEGIN
+    NEW.last_modified = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trigger_update_last_modified
+BEFORE UPDATE ON products
+FOR EACH ROW EXECUTE FUNCTION update_last_modified();
+```
+
+*plpgsql - Procedural Language/PostgreSQL
